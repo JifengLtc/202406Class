@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户注册</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .register-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 350px;
+        }
+        .register-container h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .register-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #34a853;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .register-btn:hover {
+            background-color: #2d8e47;
+        }
+        .error-message {
+            color: red;
+            margin-top: 10px;
+            text-align: center;
+        }
+        .login-link {
+            text-align: center;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <h2>用户注册</h2>
+        <form id="registerForm">
+            <div class="form-group">
+                <label for="regUsername">用户名</label>
+                <input type="text" id="regUsername" name="username" required>
+            </div>
+            <div class="form-group">
+                <label for="regEmail">电子邮箱</label>
+                <input type="email" id="regEmail" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="regPassword">密码</label>
+                <input type="password" id="regPassword" name="password" required>
+            </div>
+            <div class="form-group">
+                <label for="regConfirmPassword">确认密码</label>
+                <input type="password" id="regConfirmPassword" name="confirmPassword" required>
+            </div>
+            <button type="submit" class="register-btn">注册</button>
+            <div id="errorMessage" class="error-message"></div>
+            <div class="login-link">
+                已有账号? <a href="login.html">立即登录</a>
+            </div>
+        </form>
+    </div>
+
+    <script src="auth.js"></script>
+    <script>
+        // 注册表单提交处理
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('regUsername').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+            const confirmPassword = document.getElementById('regConfirmPassword').value;
+            
+            // 简单前端验证
+            if (password !== confirmPassword) {
+                document.getElementById('errorMessage').textContent = '两次输入的密码不一致';
+                return;
+            }
+            
+            try {
+                // 显示加载状态
+                const registerBtn = document.querySelector('.register-btn');
+                registerBtn.disabled = true;
+                registerBtn.textContent = '注册中...';
+                
+                const response = await fetch('http://localhost:3000/api/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // 注册成功，自动登录
+                    localStorage.setItem('authToken', data.token);
+                    localStorage.setItem('username', data.username);
+                    window.location.href = 'dashboard.html';
+                } else {
+                    // 显示错误信息
+                    document.getElementById('errorMessage').textContent = data.message || '注册失败';
+                }
+            } catch (error) {
+                console.error('注册错误:', error);
+                document.getElementById('errorMessage').textContent = '注册失败，请检查网络连接';
+            } finally {
+                // 恢复按钮状态
+                const registerBtn = document.querySelector('.register-btn');
+                registerBtn.disabled = false;
+                registerBtn.textContent = '注册';
+            }
+        });
+    </script>
+</body>
+</html>

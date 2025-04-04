@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户仪表盘</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        .header {
+            background-color: #4285f4;
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .logout-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .logout-btn:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>欢迎回来, <span id="usernameDisplay"></span></h2>
+        <button class="logout-btn" id="logoutBtn">退出登录</button>
+    </div>
+    
+    <div class="container">
+        <h3>仪表盘内容</h3>
+        <p>这里是您的个人仪表盘，您可以在这里查看和管理您的账户信息。</p>
+    </div>
+
+    <script src="auth.js"></script>
+    <script>
+        // 检查登录状态
+        checkAuth();
+        
+        // 显示用户名
+        const currentUser = getCurrentUser();
+        document.getElementById('usernameDisplay').textContent = currentUser.username;
+        
+        // 登出按钮事件
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            logout();
+        });
+        
+        // 示例：获取受保护的数据
+        async function fetchProtectedData() {
+            try {
+                const response = await fetch('http://localhost:3000/api/protected', {
+                    headers: {
+                        'x-access-token': localStorage.getItem('authToken')
+                    }
+                });
+                
+                const data = await response.json();
+                console.log('受保护数据:', data);
+            } catch (error) {
+                console.error('获取数据错误:', error);
+            }
+        }
+        
+        // 页面加载后获取数据
+        fetchProtectedData();
+    </script>
+</body>
+</html>
